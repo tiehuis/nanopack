@@ -33,7 +33,7 @@ void np_str(uint8_t **p, const char *s);
 /* Short calls to avoid small function call overhead. */
 #define _np_w0(p, n)        \
 do {                        \
-    *(*p)++ = (op);         \
+    *(*p)++ = (n);          \
 } while (0)
 
 #define _np_w1(p, n, op)    \
@@ -45,18 +45,20 @@ do {                        \
 void _np_w2(uint8_t **p, uint16_t n, uint8_t op);
 void _np_w4(uint8_t **p, uint32_t n, uint8_t op);
 void _np_w8(uint8_t **p, uint64_t n, uint8_t op);
+void _np_uint(uint8_t **p, uint64_t n, uint8_t o);
+void _np_int(uint8_t **p, int64_t n, uint8_t o);
 
-#define np_u8(p, n) _np_w1(p, n, 0xCC)
-#define np_u16(p, n) _np_w2(p, n, 0xCD)
-#define np_u32(p, n) _np_w4(p, n, 0xCE)
-#define np_u64(p, n) _np_w8(p, n, 0xCF)
+#define np_u8(p, n) _np_uint(p, n, 0)
+#define np_u16(p, n) _np_uint(p, n, 0)
+#define np_u32(p, n) _np_uint(p, n, 0)
+#define np_u64(p, n) _np_uint(p, n, 0)
 
 /* Signed integer values assume int -> uint cast is consistent across
  * machines. */
-#define np_i8(p, n) _np_w1(p, n, 0xD0)
-#define np_i16(p, n) _np_w2(p, n, 0xD1)
-#define np_i32(p, n) _np_w4(p, n, 0xD2)
-#define np_i64(p, n) _np_w8(p, n, 0xD3)
+#define np_i8(p, n) _np_int(p, n, 4)
+#define np_i16(p, n) _np_int(p, n, 4)
+#define np_i32(p, n) _np_int(p, n, 4)
+#define np_i64(p, n) _np_int(p, n, 4)
 
 #if NANOPACK_HAS_FP != 0
 void np_float(uint8_t **p, float n);

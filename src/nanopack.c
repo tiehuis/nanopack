@@ -129,6 +129,36 @@ void np_str(uint8_t **p, const char *s)
     *p += n;
 }
 
+void _np_uint(uint8_t **p, uint64_t n, uint8_t o)
+{
+    // Note: Figure out how to handle 5-bit fixnum
+    if (n <= 0x7F) {
+        _np_w0(p, n);
+    }
+    else if (n <= 0xFF) {
+        _np_w1(p, n, 0xCC + o);
+    }
+    else if (n <= 0xFFFF) {
+        _np_w2(p, n, 0xCD + o);
+    }
+    else if (n <= 0xFFFFFFFF) {
+        _np_w4(p, n, 0xCE + o);
+    }
+    else {
+        _np_w8(p, n, 0xCF + o);
+    }
+}
+
+void _np_int(uint8_t **p, int64_t n, uint8_t o)
+{
+    if (-0x20 <= n && n < 0) {
+        _np_w0(p, 0xE0 | (+n));
+    }
+    else {
+        _np_uint(p, n, o);
+    }
+}
+
 #if NANOPACK_HAS_FP != 0
 void np_float(uint8_t **p, float n)
 {
