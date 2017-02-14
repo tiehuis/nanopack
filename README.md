@@ -10,6 +10,25 @@ and `-Os`.
 If you are not on a resource-constrained embedded device, I'd recommend instead
 using the [mpack](https://github.com/ludocode/mpack) library.
 
+```
+#include "nanopack.h"
+
+int main(void)
+{
+    size_t len;
+    uint8_t buf[64];
+    uint8_t *w = buf;
+
+    np_map(&w, 2);
+    np_str(&w, "key1");
+    np_i32(&w, "value1");
+
+    len = w - buf;
+
+    // msgpack data stored from buf[0..len]
+}
+```
+
 ## Installation
 
 The easiest method to use is to copy the `nanopack.c` and `nanopack.h` files
