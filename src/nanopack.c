@@ -131,7 +131,6 @@ void np_str(uint8_t **p, const char *s)
 
 void _np_uint(uint8_t **p, uint64_t n, uint8_t o)
 {
-    // Note: Figure out how to handle 5-bit fixnum
     if (n <= 0x7F) {
         _np_w0(p, n);
     }

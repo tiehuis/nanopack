@@ -11,6 +11,7 @@
 
 char *err_group = "ERR!";
 int err_count = 0;
+int global_err_count = 0;
 int test_count = 0;
 int pass_two = 0;
 uint8_t w[4096];
@@ -52,6 +53,7 @@ do {                                                                \
     if (memcmp(w, _s, sizeof(_s) - 1)) {                            \
         if (!pass_two) {                                            \
             err_count += 1;                                         \
+            global_err_count += 1;                                  \
         }                                                           \
         else {                                                      \
             printf("%d ", __LINE__);                                \
@@ -154,5 +156,5 @@ int main(void)
     TEST_SIMPLE("\xcf\xff\xff\xff\xff\xff\xff\xff\xff", np_u64, 0xFFFFFFFFFFFFFFFFULL);
     TEST_GROUP_END();
 
-    return 0;
+    return global_err_count;
 }

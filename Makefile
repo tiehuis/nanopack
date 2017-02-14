@@ -1,5 +1,6 @@
-CC     ?= clang
-CFLAGS += -Wall -Wextra -std=c99 -pedantic -Os -Isrc
+CC      ?= clang
+CFLAGS  += -Wall -Wextra -std=c89 -pedantic -Os -Isrc
+TCFLAGS := -Wall -Wextra -std=c99 -Os -Isrc
 
 all:
 	@echo "   test - run all tests"
@@ -9,10 +10,10 @@ test: test_runner
 	@./test_runner
 
 test_runner: build/test.o build/libnp.a
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(TCFLAGS) $^ -o $@
 
 build/test.o: test/test.c | build
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(TCFLAGS) -c $< -o $@
 
 build/nanopack.o: src/nanopack.c src/nanopack.h | build
 	$(CC) $(CFLAGS) -c $< -o $@
