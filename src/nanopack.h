@@ -10,6 +10,26 @@
 #define NANOPACK_HAS_FP 0
 #endif
 
+/* Debug switches on overflow checking and tests upper limits against the
+ * used buffers. */
+#ifndef NANOPACK_DEBUG
+#define NANOPACK_DEBUG 0
+#endif
+
+#if NANOPACK_DEBUG != 0
+/* This must be provided by the caller and will be called on error. */
+void np_err_callback(int line, const char *filename, const char *err_msg);
+
+#define np_debug_buf_req(p, n)                                      \
+do {                                                                \
+    if (p->len + n >= p->cap) {                                     \
+        np_err_callback(__LINE__, __FILE__, "buffer overflow!");    \
+    }                                                               \
+} while (0)
+#else
+#define np_debug_buf_req(p, n)
+#endif
+
 #include <stdint.h> /* For fixed-width integers */
 #include <stddef.h> /* For size_t */
 
@@ -25,10 +45,11 @@ typedef struct {
 } np_buf;
 
 /* Construct a new `np_buf` object. */
-#define np_make_buf(b, c) (np_buf) { .w = b, .len = 0, .cap = c }
+np_buf np_make_buf(uint8_t *w, size_t l);
 
 /* Can override with libc memcpy/strlen if present. */
 #define np_memcpy _np_memcpy
+#define np_memset _np_memset
 #define np_strlen _np_strlen
 
 /* Construct a map with the specified number of items (keys + values). */
@@ -48,11 +69,13 @@ void np_str(np_buf *p, const char *s);
 /* Short calls to avoid small function call overhead. */
 #define _np_w0(p, n)        \
 do {                        \
+    np_debug_buf_req(p, 1); \
     *p->w++ = (n);          \
 } while (0)
 
 #define _np_w1(p, n, op)    \
 do {                        \
+    np_debug_buf_req(p, 2); \
     *p->w++ = (op);         \
     *p->w++ = (n);          \
 } while (0)

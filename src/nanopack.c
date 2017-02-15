@@ -33,6 +33,19 @@ static size_t _np_strlen(const char *p)
     return i;
 }
 
+static void* _np_memset(void *s, int c, size_t n)
+{
+    size_t i;
+    uint8_t *o = s;
+    uint8_t *_s = s;
+
+    for (i = 0; i < n; ++i) {
+        *_s++ = c;
+    }
+
+    return o;
+}
+
 static void* _np_memcpy(void *d, const void *s, size_t n)
 {
     size_t i;
@@ -47,6 +60,15 @@ static void* _np_memcpy(void *d, const void *s, size_t n)
     return o;
 }
 
+np_buf np_make_buf(uint8_t *w, size_t l)
+{
+    np_buf np;
+    np_memset(&np, 0, sizeof(np_buf));
+    np.w = w;
+    np.len = l;
+    return np;
+}
+
 /* void _np_w0(np_buf *p, uint8_t n); */
 
 /* void _np_w1(np_buf *p, uint8_t n, uint8_t op); */
@@ -55,6 +77,7 @@ void _np_w2(np_buf *p, uint16_t n, uint8_t op)
 {
     uint8_t b[8];
 
+    np_debug_buf_req(p, 3);
     to_be_u8(n, b);
     *p->w++ = op;
     *p->w++ = b[6];
@@ -65,6 +88,7 @@ void _np_w4(np_buf *p, uint32_t n, uint8_t op)
 {
     uint8_t b[8];
 
+    np_debug_buf_req(p, 5);
     to_be_u8(n, b);
     *p->w++ = op;
     *p->w++ = b[4];
@@ -77,6 +101,7 @@ void _np_w8(np_buf *p, uint64_t n, uint8_t op)
 {
     uint8_t b[8];
 
+    np_debug_buf_req(p, 9);
     to_be_u8(n, b);
     *p->w++ = op;
     *p->w++ = b[0];
