@@ -47,6 +47,10 @@ static void* _np_memcpy(void *d, const void *s, size_t n)
     return o;
 }
 
+/* void _np_w0(np_buf *p, uint8_t n); */
+
+/* void _np_w1(np_buf *p, uint8_t n, uint8_t op); */
+
 void _np_w2(np_buf *p, uint16_t n, uint8_t op)
 {
     uint8_t b[8];
@@ -96,16 +100,6 @@ void _np_map_or_arr(np_buf *p, uint32_t n, uint8_t c)
     else {
         _np_w4(p, n, 0xDF - (2 * c));
     }
-}
-
-void np_nil(np_buf *p)
-{
-    _np_w0(p, 0xC0);
-}
-
-void np_bool(np_buf *p, int n)
-{
-    _np_w0(p, n ? 0xC3 : 0xC2);
 }
 
 void np_str(np_buf *p, const char *s)
