@@ -45,7 +45,7 @@ do {                                                                \
 /* Note: subtract one from string to avoid comparing null-terminator. */
 #define TEST_SIMPLE(string, fn, ...)                                \
 do {                                                                \
-    uint8_t *_b = w;                                                \
+    np_buf _b = np_make_buf(w, sizeof(w));                          \
     const uint8_t _s[] = string;                                    \
     fn(&_b, __VA_ARGS__);                                           \
     test_count += 1;                                                \

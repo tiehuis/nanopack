@@ -47,48 +47,48 @@ static void* _np_memcpy(void *d, const void *s, size_t n)
     return o;
 }
 
-void _np_w2(uint8_t **p, uint16_t n, uint8_t op)
+void _np_w2(np_buf *p, uint16_t n, uint8_t op)
 {
     uint8_t b[8];
 
     to_be_u8(n, b);
-    *(*p)++ = op;
-    *(*p)++ = b[6];
-    *(*p)++ = b[7];
+    *p->w++ = op;
+    *p->w++ = b[6];
+    *p->w++ = b[7];
 }
 
-void _np_w4(uint8_t **p, uint32_t n, uint8_t op)
+void _np_w4(np_buf *p, uint32_t n, uint8_t op)
 {
     uint8_t b[8];
 
     to_be_u8(n, b);
-    *(*p)++ = op;
-    *(*p)++ = b[4];
-    *(*p)++ = b[5];
-    *(*p)++ = b[6];
-    *(*p)++ = b[7];
+    *p->w++ = op;
+    *p->w++ = b[4];
+    *p->w++ = b[5];
+    *p->w++ = b[6];
+    *p->w++ = b[7];
 }
 
-void _np_w8(uint8_t **p, uint64_t n, uint8_t op)
+void _np_w8(np_buf *p, uint64_t n, uint8_t op)
 {
     uint8_t b[8];
 
     to_be_u8(n, b);
-    *(*p)++ = op;
-    *(*p)++ = b[0];
-    *(*p)++ = b[1];
-    *(*p)++ = b[2];
-    *(*p)++ = b[3];
-    *(*p)++ = b[4];
-    *(*p)++ = b[5];
-    *(*p)++ = b[6];
-    *(*p)++ = b[7];
+    *p->w++ = op;
+    *p->w++ = b[0];
+    *p->w++ = b[1];
+    *p->w++ = b[2];
+    *p->w++ = b[3];
+    *p->w++ = b[4];
+    *p->w++ = b[5];
+    *p->w++ = b[6];
+    *p->w++ = b[7];
 }
 
-void _np_map_or_arr(uint8_t **p, uint32_t n, uint8_t c)
+void _np_map_or_arr(np_buf *p, uint32_t n, uint8_t c)
 {
     if (n < 0x10) {
-        *(*p)++ = (0x80 + (c << 4)) | (n & 0xF);
+        _np_w0(p, (0x80 + (c << 4)) | n);
     }
     else if (n < 0x10000) {
         _np_w2(p, n, 0xDE - (2 * c));
@@ -98,22 +98,22 @@ void _np_map_or_arr(uint8_t **p, uint32_t n, uint8_t c)
     }
 }
 
-void np_nil(uint8_t **p)
+void np_nil(np_buf *p)
 {
-    *(*p)++ = 0xC0;
+    _np_w0(p, 0xC0);
 }
 
-void np_bool(uint8_t **p, int n)
+void np_bool(np_buf *p, int n)
 {
-    *(*p)++ = n ? 0xC3 : 0xC2;
+    _np_w0(p, n ? 0xC3 : 0xC2);
 }
 
-void np_str(uint8_t **p, const char *s)
+void np_str(np_buf *p, const char *s)
 {
     size_t n = np_strlen(s);
 
     if (n < 0x20) {
-        *(*p)++ = 0xA0 | (n & 0x1F);
+        _np_w0(p, 0xA0 | (n & 0x1F));
     }
     else if (n < 0x100) {
         _np_w1(p, n, 0xD9);
@@ -125,11 +125,11 @@ void np_str(uint8_t **p, const char *s)
         _np_w4(p, n, 0xDB);
     }
 
-    np_memcpy(*p, s, n);
-    *p += n;
+    np_memcpy(p->w, s, n);
+    p->w += n;
 }
 
-void _np_uint(uint8_t **p, uint64_t n, uint8_t o)
+void _np_uint(np_buf *p, uint64_t n, uint8_t o)
 {
     if (n <= 0x7F) {
         _np_w0(p, n);
@@ -148,7 +148,7 @@ void _np_uint(uint8_t **p, uint64_t n, uint8_t o)
     }
 }
 
-void _np_int(uint8_t **p, int64_t n, uint8_t o)
+void _np_int(np_buf *p, int64_t n, uint8_t o)
 {
     if (-0x20 <= n && n < 0) {
         _np_w0(p, 0xE0 | (+n));
@@ -159,7 +159,7 @@ void _np_int(uint8_t **p, int64_t n, uint8_t o)
 }
 
 #if NANOPACK_HAS_FP != 0
-void np_float(uint8_t **p, float n)
+void np_float(np_buf *p, float n)
 {
     /* unimplemented */
 }

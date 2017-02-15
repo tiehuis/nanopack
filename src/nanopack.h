@@ -13,6 +13,20 @@
 #include <stdint.h> /* For fixed-width integers */
 #include <stddef.h> /* For size_t */
 
+typedef struct {
+    /* Write pointer into buffer */
+    uint8_t *w;
+
+    /* Length of buffer written */
+    size_t len;
+
+    /* Capacity of buffer */
+    size_t cap;
+} np_buf;
+
+/* Construct a new `np_buf` object. */
+#define np_make_buf(b, c) (np_buf) { .w = b, .len = 0, .cap = c }
+
 /* Can override with libc memcpy/strlen if present. */
 #define np_memcpy _np_memcpy
 #define np_strlen _np_strlen
@@ -24,29 +38,29 @@
 #define np_arr(p, n) _np_map_or_arr(p, n, 1)
 
 /* Should not be called directly. Use `np_map` or `np_arr` instead. */
-void _np_map_or_arr(uint8_t **p, uint32_t n, uint8_t c);
+void _np_map_or_arr(np_buf *p, uint32_t n, uint8_t c);
 
-void np_nil(uint8_t **p);
-void np_bool(uint8_t **p, int n);
-void np_str(uint8_t **p, const char *s);
+void np_nil(np_buf *p);
+void np_bool(np_buf *p, int n);
+void np_str(np_buf *p, const char *s);
 
 /* Short calls to avoid small function call overhead. */
 #define _np_w0(p, n)        \
 do {                        \
-    *(*p)++ = (n);          \
+    *p->w++ = (n);          \
 } while (0)
 
 #define _np_w1(p, n, op)    \
 do {                        \
-    *(*p)++ = (op);         \
-    *(*p)++ = (n);          \
+    *p->w++ = (op);         \
+    *p->w++ = (n);          \
 } while (0)
 
-void _np_w2(uint8_t **p, uint16_t n, uint8_t op);
-void _np_w4(uint8_t **p, uint32_t n, uint8_t op);
-void _np_w8(uint8_t **p, uint64_t n, uint8_t op);
-void _np_uint(uint8_t **p, uint64_t n, uint8_t o);
-void _np_int(uint8_t **p, int64_t n, uint8_t o);
+void _np_w2(np_buf *p, uint16_t n, uint8_t op);
+void _np_w4(np_buf *p, uint32_t n, uint8_t op);
+void _np_w8(np_buf *p, uint64_t n, uint8_t op);
+void _np_uint(np_buf *p, uint64_t n, uint8_t o);
+void _np_int(np_buf *p, int64_t n, uint8_t o);
 
 #define np_u8(p, n) _np_uint(p, n, 0)
 #define np_u16(p, n) _np_uint(p, n, 0)
@@ -61,7 +75,7 @@ void _np_int(uint8_t **p, int64_t n, uint8_t o);
 #define np_i64(p, n) _np_int(p, n, 4)
 
 #if NANOPACK_HAS_FP != 0
-void np_float(uint8_t **p, float n);
+void np_float(np_buf *p, float n);
 #endif
 
 #endif

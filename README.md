@@ -17,15 +17,13 @@ int main(void)
 {
     size_t len;
     uint8_t buf[64];
-    uint8_t *w = buf;
+    np_buf w = np_make_buf(buf, sizeof(buf));
 
     np_map(&w, 2);
     np_str(&w, "key1");
     np_i32(&w, "value1");
 
-    len = w - buf;
-
-    // msgpack data stored from buf[0..len]
+    // msgpack data stored from buf[0..w.len]
 }
 ```
 
