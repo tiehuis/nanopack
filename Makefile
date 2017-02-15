@@ -1,6 +1,8 @@
 CC      ?= clang
 CFLAGS  += -Wall -Wextra -std=c89 -pedantic -Os -Isrc
-TCFLAGS := -Wall -Wextra -std=c99 -Os -Isrc
+
+# We rely on C99 for testing solely for long-long literal suffixes
+TCFLAGS += -Wall -Wextra -std=c99 -pedantic -Os -Isrc
 
 all:
 	@echo "   test - run all tests"
