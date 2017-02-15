@@ -65,7 +65,8 @@ np_buf np_make_buf(uint8_t *w, size_t l)
     np_buf np;
     np_memset(&np, 0, sizeof(np_buf));
     np.w = w;
-    np.len = l;
+    np.len = 0;
+    np.cap = l;
     return np;
 }
 
@@ -82,6 +83,7 @@ void _np_w2(np_buf *p, uint16_t n, uint8_t op)
     *p->w++ = op;
     *p->w++ = b[6];
     *p->w++ = b[7];
+    p->len += 3;
 }
 
 void _np_w4(np_buf *p, uint32_t n, uint8_t op)
@@ -95,6 +97,7 @@ void _np_w4(np_buf *p, uint32_t n, uint8_t op)
     *p->w++ = b[5];
     *p->w++ = b[6];
     *p->w++ = b[7];
+    p->len += 5;
 }
 
 void _np_w8(np_buf *p, uint64_t n, uint8_t op)
@@ -112,6 +115,7 @@ void _np_w8(np_buf *p, uint64_t n, uint8_t op)
     *p->w++ = b[5];
     *p->w++ = b[6];
     *p->w++ = b[7];
+    p->len += 9;
 }
 
 void _np_map_or_arr(np_buf *p, uint32_t n, uint8_t c)
@@ -146,34 +150,47 @@ void np_str(np_buf *p, const char *s)
 
     np_memcpy(p->w, s, n);
     p->w += n;
+    p->len += n;
 }
 
-void _np_uint(np_buf *p, uint64_t n, uint8_t o)
+void np_uint(np_buf *p, uint64_t n)
 {
     if (n <= 0x7F) {
         _np_w0(p, n);
     }
     else if (n <= 0xFF) {
-        _np_w1(p, n, 0xCC + o);
+        _np_w1(p, n, 0xCC);
     }
     else if (n <= 0xFFFF) {
-        _np_w2(p, n, 0xCD + o);
+        _np_w2(p, n, 0xCD);
     }
     else if (n <= 0xFFFFFFFF) {
-        _np_w4(p, n, 0xCE + o);
+        _np_w4(p, n, 0xCE);
     }
     else {
-        _np_w8(p, n, 0xCF + o);
+        _np_w8(p, n, 0xCF);
     }
 }
 
-void _np_int(np_buf *p, int64_t n, uint8_t o)
+void np_int(np_buf *p, int64_t n)
 {
-    if (-0x20 <= n && n < 0) {
-        _np_w0(p, 0xE0 | (+n));
+    if (n >= 0) {
+        np_uint(p, n);
+    }
+    if (n >= -32) {
+        _np_w0(p, 0xE0 | n);
+    }
+    else if (n >= INT8_MIN) {
+        _np_w1(p, n, 0xD0);
+    }
+    else if (n >= INT16_MIN) {
+        _np_w2(p, n, 0xD1);
+    }
+    else if (n >= INT32_MIN) {
+        _np_w4(p, n, 0xD2);
     }
     else {
-        _np_uint(p, n, o);
+        _np_w8(p, n, 0xD3);
     }
 }
 

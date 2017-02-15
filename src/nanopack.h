@@ -71,6 +71,7 @@ void np_str(np_buf *p, const char *s);
 do {                        \
     np_debug_buf_req(p, 1); \
     *p->w++ = (n);          \
+    p->len += 1;            \
 } while (0)
 
 #define _np_w1(p, n, op)    \
@@ -78,25 +79,27 @@ do {                        \
     np_debug_buf_req(p, 2); \
     *p->w++ = (op);         \
     *p->w++ = (n);          \
+    p->len += 2;            \
 } while (0)
 
 void _np_w2(np_buf *p, uint16_t n, uint8_t op);
 void _np_w4(np_buf *p, uint32_t n, uint8_t op);
 void _np_w8(np_buf *p, uint64_t n, uint8_t op);
-void _np_uint(np_buf *p, uint64_t n, uint8_t o);
-void _np_int(np_buf *p, int64_t n, uint8_t o);
 
-#define np_u8(p, n) _np_uint(p, n, 0)
-#define np_u16(p, n) _np_uint(p, n, 0)
-#define np_u32(p, n) _np_uint(p, n, 0)
-#define np_u64(p, n) _np_uint(p, n, 0)
+void np_uint(np_buf *p, uint64_t n);
+void np_int(np_buf *p, int64_t n);
+
+#define np_u8(p, n) np_uint(p, n)
+#define np_u16(p, n) np_uint(p, n)
+#define np_u32(p, n) np_uint(p, n)
+#define np_u64(p, n) np_uint(p, n)
 
 /* Signed integer values assume int -> uint cast is consistent across
  * machines. */
-#define np_i8(p, n) _np_int(p, n, 4)
-#define np_i16(p, n) _np_int(p, n, 4)
-#define np_i32(p, n) _np_int(p, n, 4)
-#define np_i64(p, n) _np_int(p, n, 4)
+#define np_i8(p, n) np_int(p, n)
+#define np_i16(p, n) np_int(p, n)
+#define np_i32(p, n) np_int(p, n)
+#define np_i64(p, n) np_int(p, n)
 
 #if NANOPACK_HAS_FP != 0
 void np_float(np_buf *p, float n);
