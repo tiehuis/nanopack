@@ -131,6 +131,16 @@ void _np_map_or_arr(np_buf *p, uint32_t n, uint8_t c)
     }
 }
 
+void np_nil(np_buf *p)
+{
+    _np_w0(p, 0xC0);
+}
+
+void np_bool(np_buf *p, int n)
+{
+    _np_w0(p, n ? 0xC3 : 0xC2);
+}
+
 void np_str(np_buf *p, const char *s)
 {
     size_t n = np_strlen(s);

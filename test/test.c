@@ -82,18 +82,6 @@ do {                                                                \
 
 int main(void)
 {
-#if 0
-    uint8_t b[64];
-    np_buf t = np_make_buf(b, sizeof(b));
-    np_i8(&t, -128);
-    for (size_t i = 0; i < t.len; ++i) {
-        printf("%02X ", b[i]);
-    }
-    printf("\n");
-    return 0;
-#endif
-
-
     TEST_GROUP_BEGIN("+fixnum \\w +functions");
     TEST_SIMPLE1("\x00", np_u8, 0);
     TEST_SIMPLE1("\x01", np_u8, 1);
@@ -235,6 +223,12 @@ int main(void)
     TEST_SIMPLE1("\xd2\xff\xff\x7f\xff", np_i64, -32769);
     TEST_SIMPLE1("\xd3\xff\xff\xff\xff\x7f\xff\xff\xff", np_i64, -2147483649ll);
     TEST_SIMPLE1("\xd3\x80\x00\x00\x00\x00\x00\x00\x00", np_i64, INT64_MIN);
+    TEST_GROUP_END();
+
+    TEST_GROUP_BEGIN("misc");
+    TEST_SIMPLE0("\xc0", np_nil);
+    TEST_SIMPLE1("\xc2", np_bool, 0);
+    TEST_SIMPLE1("\xc3", np_bool, 1);
     TEST_GROUP_END();
 
     return global_err_count;
