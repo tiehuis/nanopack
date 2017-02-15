@@ -15,6 +15,9 @@ int global_err_count = 0;
 int test_count = 0;
 int pass_two = 0;
 uint8_t w[4096];
+int i, j;
+
+#define MAX_DUMP_LENGTH 64
 
 #define TEST_GROUP_BEGIN(group)                                     \
 pass_two = 0;                                                       \
@@ -22,6 +25,15 @@ do {                                                                \
     err_group = (group);                                            \
     err_count = 0;                                                  \
     test_count = 0;
+
+#define DUMP(id)                                                    \
+do {                                                                \
+    printf("  line %d\n", __LINE__);                                \
+    printf("      found: ");                                        \
+    dump_array(w, id.len);                                          \
+    printf("     expect: ");                                        \
+    dump_array(_s, sizeof(_s));                                     \
+} while (0)
 
 /* Note: subtract one from string to avoid comparing null-terminator. */
 #define TEST_SIMPLE0(string, fn)                                    \
@@ -37,7 +49,7 @@ do {                                                                \
             global_err_count += 1;                                  \
         }                                                           \
         else {                                                      \
-            printf("%d ", __LINE__);                                \
+            DUMP(_b);                                               \
         }                                                           \
     }                                                               \
 } while(0)
@@ -55,10 +67,30 @@ do {                                                                \
             global_err_count += 1;                                  \
         }                                                           \
         else {                                                      \
-            printf("%d ", __LINE__);                                \
+            DUMP(_b);                                               \
         }                                                           \
     }                                                               \
 } while(0)
+
+/* Use `buf` as the np_buf argument. */
+#define TEST_COMPLEX(string, statements)                            \
+do {                                                                \
+    np_buf buf = np_make_buf(w, sizeof(w));                         \
+    const uint8_t _s[] = string;                                    \
+    statements                                                      \
+    test_count += 1;                                                \
+                                                                    \
+    if (memcmp(w, _s, sizeof(_s) - 1)) {                            \
+        if (!pass_two) {                                            \
+            err_count += 1;                                         \
+            global_err_count += 1;                                  \
+        }                                                           \
+        else {                                                      \
+            DUMP(buf);                                              \
+        }                                                           \
+    }                                                               \
+} while(0)
+
 
 #define TEST_GROUP_END()                                            \
     if (!pass_two) {                                                \
@@ -68,7 +100,6 @@ do {                                                                \
     }                                                               \
     if (err_count) {                                                \
         pass_two = 1;                                               \
-        printf("  !! failures: ");                                  \
         continue;                                                   \
     }                                                               \
     else {                                                          \
@@ -79,6 +110,21 @@ do {                                                                \
     }                                                               \
 } while (1)
 
+
+
+static void dump_array(const uint8_t *a, size_t l)
+{
+    size_t i;
+    for (i = 0; i < l; ++i) {
+        if (i > MAX_DUMP_LENGTH) {
+            printf("...");
+            break;
+        }
+
+        printf("%02X ", a[i]);
+    }
+    printf("\n");
+}
 
 int main(void)
 {
@@ -229,6 +275,29 @@ int main(void)
     TEST_SIMPLE0("\xc0", np_nil);
     TEST_SIMPLE1("\xc2", np_bool, 0);
     TEST_SIMPLE1("\xc3", np_bool, 1);
+    TEST_GROUP_END();
+
+    TEST_GROUP_BEGIN("fixarr/arr16/arr32");
+
+    TEST_COMPLEX(
+        "\x90",
+        np_arr(&buf, 0);
+    );
+
+    TEST_COMPLEX(
+        "\x91\xc0",
+        np_arr(&buf, 1);
+        np_nil(&buf);
+    );
+
+    TEST_COMPLEX(
+        "\x9f\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e",
+        np_arr(&buf, 15);
+        for (i = 0; i < 15; ++i) {
+            np_i32(&buf, i);
+        }
+    );
+
     TEST_GROUP_END();
 
     return global_err_count;

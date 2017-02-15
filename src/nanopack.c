@@ -187,7 +187,7 @@ void np_int(np_buf *p, int64_t n)
     if (n >= 0) {
         np_uint(p, n);
     }
-    if (n >= -32) {
+    else if (n >= -32) {
         _np_w0(p, 0xE0 | n);
     }
     else if (n >= INT8_MIN) {
