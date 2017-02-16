@@ -277,7 +277,7 @@ int main(void)
     TEST_SIMPLE1("\xc3", np_bool, 1);
     TEST_GROUP_END();
 
-    TEST_GROUP_BEGIN("fixarr/arr16/arr32");
+    TEST_GROUP_BEGIN("basic fixarr/arr16/arr32");
 
     TEST_COMPLEX(
         "\x90",
@@ -296,6 +296,171 @@ int main(void)
         for (i = 0; i < 15; ++i) {
             np_i32(&buf, i);
         }
+    );
+
+    TEST_COMPLEX(
+        "\xdc\x00\x10\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c"
+        "\x0d\x0e\x0f",
+        np_arr(&buf, 16);
+        for (i = 0; i < 16; ++i) {
+            np_u32(&buf, i);
+        }
+    );
+
+    TEST_GROUP_END();
+
+    TEST_GROUP_BEGIN("basic fixmap/map16/map32");
+
+    TEST_COMPLEX(
+        "\x80",
+        np_map(&buf, 0);
+    );
+
+    TEST_COMPLEX(
+        "\x81\xc0\xc0",
+        np_map(&buf, 2);
+        np_nil(&buf);
+        np_nil(&buf);
+    );
+
+    TEST_COMPLEX(
+        "\x82\x00\x00\x01\x01",
+        np_map(&buf, 4);
+        np_i8(&buf, 0);
+        np_i16(&buf, 0);
+        np_u8(&buf, 1);
+        np_u16(&buf, 1);
+    );
+
+    TEST_COMPLEX(
+        "\x8f\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e"
+        "\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d",
+        np_map(&buf, 30);
+        for (i = 0; i < 30; ++i) {
+            np_i8(&buf, i);
+        }
+    );
+
+    TEST_COMPLEX(
+        "\xde\x00\x10\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c"
+        "\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c"
+        "\x1d\x1e\x1f",
+        np_map(&buf, 32);
+        for (i = 0; i < 32; ++i) {
+            np_int(&buf, i);
+        }
+    );
+
+    TEST_GROUP_END();
+
+    TEST_GROUP_BEGIN("nested arr");
+
+    TEST_COMPLEX(
+        "\x91\x90",
+        np_arr(&buf, 1);
+            np_arr(&buf, 0);
+    );
+
+    TEST_COMPLEX(
+        "\x93\x90\x91\x00\x92\x01\x02",
+        np_arr(&buf, 3);
+            np_arr(&buf, 0);
+            np_arr(&buf, 1);
+                np_int(&buf, 0);
+            np_arr(&buf, 2);
+                np_int(&buf, 1);
+                np_int(&buf, 2);
+    );
+
+    TEST_COMPLEX(
+        "\x95\x90\x91\xc0\x92\x90\x91\xc0\x9f\x00\x01\x02\x03\x04\x05\x06"
+        "\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\xdc\x00\x10\x00\x01\x02\x03\x04"
+        "\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f",
+        np_arr(&buf, 5);
+            np_arr(&buf, 0);
+            np_arr(&buf, 1);
+                np_nil(&buf);
+            np_arr(&buf, 2);
+                np_arr(&buf, 0);
+                np_arr(&buf, 1);
+                    np_nil(&buf);
+            np_arr(&buf, 15);
+                for (i = 0; i < 15; ++i) {
+                    np_int(&buf, i);
+                }
+            np_arr(&buf, 16);
+                for (i = 0; i < 16; ++i) {
+                    np_int(&buf, i);
+                }
+    );
+
+    TEST_GROUP_END();
+
+    TEST_GROUP_BEGIN("nested map");
+
+    TEST_COMPLEX(
+        "\x85\x00\x80\x01\x81\x00\xc0\x02\x82\x00\x80\x01\x81\xc0\xc0\x03"
+        "\x8f\x00\x00\x01\x01\x02\x02\x03\x03\x04\x04\x05\x05\x06\x06\x07"
+        "\x07\x08\x08\x09\x09\x0a\x0a\x0b\x0b\x0c\x0c\x0d\x0d\x0e\x0e\x04"
+        "\xde\x00\x10\x00\x00\x01\x01\x02\x02\x03\x03\x04\x04\x05\x05\x06"
+        "\x06\x07\x07\x08\x08\x09\x09\x0a\x0a\x0b\x0b\x0c\x0c\x0d\x0d\x0e"
+        "\x0e\x0f\x0f",
+        np_map(&buf, 10);
+            np_int(&buf, 0);
+            np_map(&buf, 0);
+            np_int(&buf, 1);
+            np_map(&buf, 2);
+                np_int(&buf, 0);
+                np_nil(&buf);
+            np_int(&buf, 2);
+            np_map(&buf, 4);
+                np_int(&buf, 0);
+                np_map(&buf, 0);
+                np_int(&buf, 1);
+                np_map(&buf, 2);
+                    np_nil(&buf);
+                    np_nil(&buf);
+            np_int(&buf, 3);
+            np_map(&buf, 30);
+                for (i = 0; i < 15; ++i) {
+                    np_int(&buf, i);
+                    np_int(&buf, i);
+                }
+            np_int(&buf, 4);
+            np_map(&buf, 32);
+                for (i = 0; i < 16; ++i) {
+                    np_int(&buf, i);
+                    np_int(&buf, i);
+                }
+    );
+
+    TEST_COMPLEX(
+       "\x85\xd0\xd1\x91\xc0\x90\x81\xc0\x00\xc0\x82\xc0\x90\x04\x05\xa5"
+        "\x68\x65\x6c\x6c\x6f\x93\xa7\x62\x6f\x6e\x6a\x6f\x75\x72\xc0\xff"
+        "\x91\x5c\xcd\x01\x5e",
+        np_map(&buf, 10);
+            np_int(&buf, -47);
+            np_arr(&buf, 1);
+                np_nil(&buf);
+            np_arr(&buf, 0);
+            np_map(&buf, 2);
+                np_nil(&buf);
+                np_int(&buf, 0);
+            np_nil(&buf);
+            np_map(&buf, 4);
+                np_nil(&buf);
+                np_arr(&buf, 0);
+                np_int(&buf, 4);
+                np_int(&buf, 5);
+            np_str(&buf, "hello");
+            np_arr(&buf, 3);
+                /* TODO: Consider str_or_nil */
+                np_str(&buf, "bonjour");
+                np_nil(&buf);
+                np_int(&buf, -1);
+            np_arr(&buf, 1);
+                np_int(&buf, 92);
+            np_int(&buf, 350);
     );
 
     TEST_GROUP_END();
