@@ -1,2 +1,4 @@
 build/
 test_runner
+*.profraw
+*.gcov
