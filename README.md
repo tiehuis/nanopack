@@ -1,5 +1,7 @@
 # nanopack
 
+[![Build Status](https://travis-ci.org/tiehuis/nanopack.svg?branch=master)](https://travis-ci.org/tiehuis/nanopack)
+
 The smallest [msgpack](http://msgpack.org/) encoding interface. This is
 designed for embedded devices where memory constraints are tight and the output
 format is usually static.
