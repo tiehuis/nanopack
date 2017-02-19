@@ -1,6 +1,7 @@
 # nanopack
 
 [![Build Status](https://travis-ci.org/tiehuis/nanopack.svg?branch=master)](https://travis-ci.org/tiehuis/nanopack)
+[![Coverage Status](https://coveralls.io/repos/github/tiehuis/nanopack/badge.svg?branch=master)](https://coveralls.io/github/tiehuis/nanopack?branch=master)
 
 The smallest [msgpack](http://msgpack.org/) encoding interface. This is
 designed for embedded devices where memory constraints are tight and the output
